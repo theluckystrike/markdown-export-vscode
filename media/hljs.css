@@ -1,0 +1,35 @@
+/* Code colours (GitHub light and dark). Class names from highlight.js. */
+.hljs-doctag, .hljs-keyword, .hljs-meta .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-variable.language_ { color: #cf222e; }
+.hljs-title, .hljs-title.class_, .hljs-title.class_.inherited__, .hljs-title.function_ { color: #8250df; }
+.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id { color: #0550ae; }
+.hljs-regexp, .hljs-string, .hljs-meta .hljs-string { color: #0a3069; }
+.hljs-built_in, .hljs-symbol { color: #953800; }
+.hljs-comment, .hljs-code, .hljs-formula { color: #59636e; }
+.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo { color: #116329; }
+.hljs-subst { color: #1f2328; }
+.hljs-section { color: #0550ae; font-weight: bold; }
+.hljs-bullet { color: #953800; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: bold; }
+.hljs-addition { color: #116329; background-color: #dafbe1; }
+.hljs-deletion { color: #82071e; background-color: #ffebe9; }
+html.theme-dark .hljs-doctag, html.theme-dark .hljs-keyword, html.theme-dark .hljs-meta .hljs-keyword, html.theme-dark .hljs-template-tag, html.theme-dark .hljs-template-variable, html.theme-dark .hljs-type, html.theme-dark .hljs-variable.language_ { color: #ff7b72; }
+html.theme-dark .hljs-title, html.theme-dark .hljs-title.class_, html.theme-dark .hljs-title.function_ { color: #d2a8ff; }
+html.theme-dark .hljs-attr, html.theme-dark .hljs-attribute, html.theme-dark .hljs-literal, html.theme-dark .hljs-meta, html.theme-dark .hljs-number, html.theme-dark .hljs-operator, html.theme-dark .hljs-variable, html.theme-dark .hljs-selector-attr, html.theme-dark .hljs-selector-class, html.theme-dark .hljs-selector-id { color: #79c0ff; }
+html.theme-dark .hljs-regexp, html.theme-dark .hljs-string, html.theme-dark .hljs-meta .hljs-string { color: #a5d6ff; }
+html.theme-dark .hljs-built_in, html.theme-dark .hljs-symbol, html.theme-dark .hljs-bullet { color: #ffa657; }
+html.theme-dark .hljs-comment, html.theme-dark .hljs-code, html.theme-dark .hljs-formula { color: #8b949e; }
+html.theme-dark .hljs-name, html.theme-dark .hljs-quote, html.theme-dark .hljs-selector-tag, html.theme-dark .hljs-selector-pseudo { color: #7ee787; }
+html.theme-dark .hljs-subst { color: #e6edf3; }
+html.theme-dark .hljs-addition { color: #aff5b4; background-color: #033a16; }
+html.theme-dark .hljs-deletion { color: #ffdcd7; background-color: #67060c; }
+@media screen and (prefers-color-scheme: dark) {
+  html.theme-auto .hljs-doctag, html.theme-auto .hljs-keyword, html.theme-auto .hljs-type, html.theme-auto .hljs-template-tag { color: #ff7b72; }
+  html.theme-auto .hljs-title, html.theme-auto .hljs-title.class_, html.theme-auto .hljs-title.function_ { color: #d2a8ff; }
+  html.theme-auto .hljs-attr, html.theme-auto .hljs-attribute, html.theme-auto .hljs-literal, html.theme-auto .hljs-meta, html.theme-auto .hljs-number, html.theme-auto .hljs-operator, html.theme-auto .hljs-variable { color: #79c0ff; }
+  html.theme-auto .hljs-regexp, html.theme-auto .hljs-string { color: #a5d6ff; }
+  html.theme-auto .hljs-built_in, html.theme-auto .hljs-symbol, html.theme-auto .hljs-bullet { color: #ffa657; }
+  html.theme-auto .hljs-comment, html.theme-auto .hljs-code { color: #8b949e; }
+  html.theme-auto .hljs-name, html.theme-auto .hljs-quote, html.theme-auto .hljs-selector-tag { color: #7ee787; }
+  html.theme-auto .hljs-subst { color: #e6edf3; }
+}

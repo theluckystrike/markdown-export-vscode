@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" rx="44" fill="#1B1F2E"/>
+  <path d="M58 34h96l44 44v144a10 10 0 0 1-10 10H58a10 10 0 0 1-10-10V44a10 10 0 0 1 10-10z" fill="#F6F8FA"/>
+  <path d="M154 34v34a10 10 0 0 0 10 10h34z" fill="#C9D1D9"/>
+  <g fill="#1B1F2E">
+    <path d="M70 92h14l14 18 14-18h14v52h-14v-30l-14 18-14-18v30H70z"/>
+    <path d="M150 92h14v28h14l-21 24-21-24h14z"/>
+  </g>
+  <g font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="22" text-anchor="middle">
+    <rect x="62" y="164" width="58" height="30" rx="6" fill="#D93F3F"/>
+    <text x="91" y="187" fill="#fff">PDF</text>
+    <rect x="128" y="164" width="58" height="30" rx="6" fill="#2B6CDE"/>
+    <text x="157" y="187" fill="#fff">DOC</text>
+  </g>
+  <rect x="62" y="202" width="124" height="8" rx="4" fill="#E6A23C"/>
+</svg>

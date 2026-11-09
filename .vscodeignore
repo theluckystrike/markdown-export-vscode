@@ -1,0 +1,13 @@
+**
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!THIRD-PARTY-NOTICES.md
+!icon.png
+!dist/extension.js
+!dist/worker.js
+!dist/*.LEGAL.txt
+!media/**
+!images/export-menu.png
+!walkthrough/**
