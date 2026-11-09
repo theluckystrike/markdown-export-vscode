@@ -99,7 +99,7 @@ Zovo Pro adds three extras. Each has 3 free tries:
 - Word template. Word exports take the fonts, colours and spacing of your own .docx or .dotx (`markdownExport.docxTemplate`).
 - Cover page from the front matter title, subtitle, author and date (`cover: true`).
 
-Zovo Pro is USD 15 once on GitHub Sponsors (https://github.com/sponsors/theluckystrike). It unlocks the Pro features in every Zovo VS Code extension. If you have already sponsored USD 10 or more, run Unlock Zovo Pro with GitHub Sponsors.
+Zovo Pro is USD 19 once on GitHub Sponsors (the "$19 one time" tier: https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878). It unlocks the Pro features in every Zovo VS Code extension. If you bought that tier, or sponsor monthly with USD 10 or more, run Unlock Zovo Pro with GitHub Sponsors.
 
 ## Settings
 
@@ -115,6 +115,7 @@ Zovo Pro is USD 15 once on GitHub Sponsors (https://github.com/sponsors/thelucky
 | `markdownExport.allowRemoteImages` | `false` | Load http(s) images |
 | `markdownExport.htmlTheme` | `auto` | HTML follows the reader's light or dark setting |
 | `markdownExport.openAfterExport` | `notify` | `notify`, `open` or `none` |
+| `markdownExport.showProFeatures` | `true` | `false` hides Merge a Folder into One PDF and the Zovo Pro commands |
 
 ## Works in
 

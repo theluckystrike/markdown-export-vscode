@@ -15,7 +15,7 @@ const FEATURES = {
   cover: { name: 'Cover page', detail: 'Starts PDF, Word and HTML exports with a title page from the front matter title, subtitle, author and date.' },
 };
 
-const PRO_TEXT = 'Zovo Pro is USD 15 once on GitHub Sponsors and unlocks Pro in every Zovo extension. Already sponsored USD 10 or more? Choose Unlock with GitHub Sponsors. Unlocking sends one question to GitHub, nothing else. Every export to PDF, Word and HTML stays free.';
+const PRO_TEXT = 'Zovo Pro is USD 19 once on GitHub Sponsors and unlocks Pro in every Zovo extension. Bought it already, or sponsor monthly with USD 10 or more? Choose Unlock with GitHub Sponsors. Unlocking sends one question to GitHub, nothing else. Every export to PDF, Word and HTML stays free.';
 
 function createPro({ vscode, context, license }) {
   const lic = license || (PRO_ENABLED ? createLicense({ vscode, context, sku: 'mdexport-pro', name: 'Zovo', commandPrefix: 'markdownExport' }) : null);

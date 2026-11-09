@@ -122,7 +122,7 @@
       },
       {
         "command": "markdownExport.getPro",
-        "title": "Get Zovo Pro (USD 15 once, all Zovo extensions)",
+        "title": "Get Zovo Pro (USD 19 once, all Zovo extensions)",
         "category": "Markdown Export"
       },
       {
@@ -183,7 +183,7 @@
         },
         {
           "command": "markdownExport.exportFolderMergedPdf",
-          "when": "explorerResourceIsFolder",
+          "when": "explorerResourceIsFolder && config.markdownExport.showProFeatures",
           "group": "7_modification@21"
         }
       ],
@@ -237,6 +237,26 @@
         {
           "command": "markdownExport.exportSelection",
           "when": "editorLangId == markdown && editorHasSelection"
+        },
+        {
+          "command": "markdownExport.exportFolderMergedPdf",
+          "when": "config.markdownExport.showProFeatures"
+        },
+        {
+          "command": "markdownExport.getPro",
+          "when": "config.markdownExport.showProFeatures"
+        },
+        {
+          "command": "markdownExport.unlockWithSponsors",
+          "when": "config.markdownExport.showProFeatures"
+        },
+        {
+          "command": "markdownExport.enterLicenseKey",
+          "when": "config.markdownExport.showProFeatures"
+        },
+        {
+          "command": "markdownExport.removeLicense",
+          "when": "config.markdownExport.showProFeatures"
         }
       ]
     },
@@ -396,6 +416,11 @@
           "type": "string",
           "default": "",
           "description": "(Pro) A .docx or .dotx file whose styles Word exports use (fonts, heading colours, spacing). Front matter `docxTemplate:` overrides it per file."
+        },
+        "markdownExport.showProFeatures": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Zovo Pro extras (Merge a Folder into One PDF) and the Zovo Pro commands. Off hides them from menus and the Command Palette. Every PDF, Word and HTML export stays free either way."
         },
         "markdownExport.coverPage": {
           "type": "boolean",
