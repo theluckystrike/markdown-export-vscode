@@ -122,6 +122,12 @@ function structurePlugin(md) {
 // ---- sanitizer for raw HTML in the Markdown ---------------------------------------------------------------------
 // The exports never run scripts from the document: a CSP blocks them in every page we render, and this removes
 // the obvious carriers first so the HTML export is safe to open too.
+// &#106; &#x6A; &colon; &Tab; ... inside an attribute value, so 'java&#115;cript:' is seen as 'javascript:'
+function decodeEntities(v) {
+  return String(v).replace(/&#x([0-9a-f]+);?/gi, (m, h) => String.fromCodePoint(Math.min(parseInt(h, 16), 0x10ffff)))
+    .replace(/&#(\d+);?/g, (m, d) => String.fromCodePoint(Math.min(Number(d), 0x10ffff)))
+    .replace(/&(colon|tab|newline|sol|lpar|rpar|period);?/gi, (m, n) => ({ colon: ':', tab: '\t', newline: '\n', sol: '/', lpar: '(', rpar: ')', period: '.' })[n.toLowerCase()]);
+}
 const DROP_ELEMENTS = 'script|iframe|frame|frameset|object|embed|applet|base|meta|link|form|noscript|template|portal';
 function sanitizeHtml(html, opts = {}) {
   let s = String(html);
@@ -130,7 +136,7 @@ function sanitizeHtml(html, opts = {}) {
   s = s.replace(/<style\b[\s\S]*?<\/style\s*>/gi, (m) => (opts.keepStyle ? m.replace(/@import[^;]*;?/gi, '').replace(/url\s*\([^)]*\)/gi, 'none') : ''));
   s = s.replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
   s = s.replace(/\s(href|src|xlink:href|action|formaction|srcset|poster|background)\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/gi, (m, attr, _q, a, b, c) => {
-    const v = (a ?? b ?? c ?? '').replace(/[\u0000- ]/g, '').toLowerCase();
+    const v = decodeEntities(a ?? b ?? c ?? '').replace(/[\u0000- ]/g, '').toLowerCase();
     if (/^(javascript|vbscript|livescript):/.test(v) || /^data:(?!image\/(png|jpe?g|gif|webp|svg\+xml|bmp))/.test(v)) return ` ${attr}="#"`;
     return m;
   });
@@ -138,7 +144,7 @@ function sanitizeHtml(html, opts = {}) {
     s = s.replace(/<img\b[^>]*>/gi, (tag) => {
       const src = /\ssrc\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(tag);
       const url = src ? (src[2] ?? src[3] ?? src[4] ?? '') : '';
-      if (!/^(https?:)?\/\//i.test(url.trim())) return tag;
+      if (!/^(https?:)?\/\//i.test(decodeEntities(url).trim())) return tag.replace(/\ssrcset\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, (m) => (/(https?:)?\/\//i.test(decodeEntities(m)) ? '' : m));
       const alt = /\salt\s*=\s*("([^"]*)"|'([^']*)')/i.exec(tag);
       const label = alt ? (alt[2] ?? alt[3]) : '';
       if (opts.onRemote) opts.onRemote(url);

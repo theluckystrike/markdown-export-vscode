@@ -250,3 +250,28 @@ test('chrome: candidates per OS, custom path, offline launch flags, header templ
   assert.ok(!chrome.launchArgs('/tmp/u', true).some((a) => a.startsWith('--proxy-server=')));
   assert.match(chromeTemplate('<b>{title}</b> {page}/{pages}', 'A&B'), /&lt;b&gt;A&amp;B&lt;\/b&gt; <span class="pageNumber"><\/span>\/<span class="totalPages"><\/span>/);
 });
+
+test('VER15: saved HTML loads nothing remote when remote images are off (srcset, style url, entity-encoded javascript:)', () => {
+  const text = [
+    '<img srcset="http://127.0.0.1:47123/srcset.png 2x" alt="s">',
+    '<div style="background-image:url(http://127.0.0.1:47123/bg.png)">bg</div>',
+    '<a href="java&#115;cript:window.__pwned=1">e1</a> <a href="jav&#x09;ascript:alert(1)">e2</a> <a href="javascript&colon;alert(1)">e3</a>',
+    '<img src="data:image/png;base64,iVBORw0KGgo=" srcset="http://127.0.0.1:47123/s2.png 2x">',
+    'V15-END',
+  ].join('\n\n');
+  const p = buildPage({ text, options: resolveOptions({}, {}), mode: 'standalone', assetsDir: ASSETS });
+  const csp = /http-equiv="Content-Security-Policy" content="([^"]*)"/.exec(p.html)[1].replace(/&#39;|&apos;/g, "'");
+  assert.match(csp, /img-src file: data: blob:;/);
+  assert.match(csp, /media-src file: data: blob:;/);
+  assert.doesNotMatch(csp, /https?:/);
+  assert.doesNotMatch(p.html, /srcset="http/);
+  assert.doesNotMatch(p.html, /href="java&#115;cript|href="jav&#x09;ascript|javascript&colon;/);
+  assert.match(p.html, /V15-END/);
+  const on = buildPage({ text, options: resolveOptions({ allowRemoteImages: true }, {}), mode: 'standalone', assetsDir: ASSETS });
+  assert.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/.exec(on.html)[1], /img-src file: data: blob: https: http:/);
+});
+
+test('VER15: decodeEntities-based scheme check keeps normal links', () => {
+  const s = md.sanitizeHtml ? md.sanitizeHtml('<a href="https://example.com/a&amp;b">ok</a> <a href="#x">in</a>') : null;
+  if (s !== null) { assert.match(s, /href="https:\/\/example.com\/a&amp;b"/); assert.match(s, /href="#x"/); }
+});

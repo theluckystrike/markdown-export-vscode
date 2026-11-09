@@ -131,7 +131,10 @@ function buildPage(input) {
     // Only the two nonce'd scripts run (Mermaid and the ready check). Scripts in the Markdown never do.
     csp = `default-src 'none'; img-src file: data: blob:${o.allowRemoteImages ? ' https: http:' : ''}; style-src 'unsafe-inline' file:; font-src file: data:; script-src 'nonce-${nonce}';`;
   } else {
-    csp = "script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';";
+    // remote images off: nothing in the saved page may load from the network when it is opened later
+    // (srcset, style="background:url(...)", <video poster> and the like included)
+    const remote = o.allowRemoteImages ? ' https: http:' : '';
+    csp = `script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; img-src file: data: blob:${remote}; media-src file: data: blob:${remote}; font-src file: data:;`;
   }
 
   const lang = o.lang ? ` lang="${escapeHtml(o.lang)}"` : '';
