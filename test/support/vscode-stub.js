@@ -10,7 +10,7 @@ const Module = require('module');
 const ROOT = path.join(__dirname, '..', '..');
 const PKG = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 
-function create({ workspace } = {}) {
+function create({ workspace, storageScheme = 'file' } = {}) {
   const log = { info: [], warn: [], error: [], status: [], opened: [], external: [], commands: [], progress: [], quick: [] };
   const ui = { open: [], save: [], input: [], quick: [], info: [], warn: [] };
   const commands = new Map();
@@ -77,7 +77,7 @@ function create({ workspace } = {}) {
       showInformationMessage: msg('info'), showWarningMessage: msg('warn'), showErrorMessage: msg('error'),
       setStatusBarMessage: (t) => { log.status.push(t); return { dispose() {} }; },
       showOpenDialog: async () => nextOf(ui.open, undefined),
-      showSaveDialog: async () => nextOf(ui.save, undefined),
+      showSaveDialog: async () => { log.saveDialogs = (log.saveDialogs || 0) + 1; return nextOf(ui.save, undefined); },
       showInputBox: async () => nextOf(ui.input, undefined),
       showQuickPick: async (items, opts) => { const list = await items; log.quick.push({ items: list, opts }); const f = nextOf(ui.quick, undefined); return typeof f === 'function' ? f(list) : f; },
       showTextDocument: async (d) => { log.opened.push(d); return {}; },
@@ -100,7 +100,7 @@ function create({ workspace } = {}) {
     extensionUri: Uri.file(ROOT),
     extensionPath: ROOT,
     extension: { id: 'zovo.zovo-markdown-export', packageJSON: PKG },
-    globalStorageUri: Uri.file(gs),
+    globalStorageUri: storageScheme === 'file' ? Uri.file(gs) : new Uri(storageScheme, gs),
     globalState: { get: (k, d) => (state.has(k) ? state.get(k) : d), update: async (k, v) => { state.set(k, v); }, keys: () => [...state.keys()], setKeysForSync() {} },
     workspaceState: { get: (k, d) => d, update: async () => {} },
     secrets: { get: async (k) => secrets.get(k), store: async (k, v) => { secrets.set(k, v); }, delete: async (k) => { secrets.delete(k); }, onDidChange: noop },

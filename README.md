@@ -2,7 +2,7 @@
 
 Markdown to PDF, Markdown to Word (.docx) and Markdown to HTML, right in VS Code. PDFs are printed by the Chrome, Edge or Brave already on your computer, so there is nothing to download. Free, no sign-in, works offline.
 
-![A release guide open in VS Code with the Export Preview beside it and the message "Saved release-guide.pdf with Google Chrome."](images/hero.png)
+![The walkthrough sample open in VS Code with the Export Preview beside it and the message "Saved release-notes.pdf with Google Chrome."](images/hero.png)
 
 - Nothing to download. No Chromium, no setup. Without a browser, a built-in engine still makes the PDF.
 - Word that behaves like Word. Headings use Word's own Heading 1 to 6 styles, so the Navigation pane and Word's table of contents work. Real numbered lists, tables, footnotes and code with colours.
@@ -14,6 +14,8 @@ Markdown to PDF, Markdown to Word (.docx) and Markdown to HTML, right in VS Code
 Open a Markdown file and click the export button in the editor title bar, or press `Cmd+Alt+E` (macOS) or `Ctrl+Alt+E`. Pick PDF, Word (DOCX), HTML or all three. The file is saved next to the Markdown file.
 
 You can also right-click a Markdown file in the Explorer (Markdown Export menu), select several files, right-click a folder (Export Every Markdown File in a Folder), or select text and choose Export Selection. From the Command Palette, the folder export lists your workspace folders and every folder that holds Markdown files, so you do not have to browse for it.
+
+![The folder list of Merge a Folder into One PDF: the workspace folder, a book folder with 3 Markdown files, and Choose another folder](images/folder-pick.png)
 
 New to it? Get Started (in the Command Palette: Markdown Export: Get Started) opens a sample with a table, code, a formula and a Mermaid diagram to try the export on.
 
@@ -71,7 +73,7 @@ The most-installed Markdown PDF extension has 4.3 million installs. Its users re
 
 | Reported problem | Links | Here |
 |---|---|---|
-| It downloads Chromium before the first PDF ("hundreds of megabytes for a simple pdf converter"). Chrome for Testing 157 is 197 to 211 MB per download. | [review, Feb 2026](https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf&ssr=false#review-details), [#80 Failed to download Chromium](https://github.com/yzane/vscode-markdown-pdf/issues/80), [#441 download behind a proxy](https://github.com/yzane/vscode-markdown-pdf/issues/441), [#445 incomplete download](https://github.com/yzane/vscode-markdown-pdf/issues/445) | Downloads nothing. The whole extension is a 3.4 MB download. |
+| It downloads Chromium before the first PDF ("hundreds of megabytes for a simple pdf converter"). Chrome for Testing 157 is 197 to 211 MB per download. | [review, Feb 2026](https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf&ssr=false#review-details), [#80 Failed to download Chromium](https://github.com/yzane/vscode-markdown-pdf/issues/80), [#441 download behind a proxy](https://github.com/yzane/vscode-markdown-pdf/issues/441), [#445 incomplete download](https://github.com/yzane/vscode-markdown-pdf/issues/445) | Downloads nothing. The whole extension is a 4 MB download. |
 | "Failed to launch the browser process", so no PDF at all. | [#436](https://github.com/yzane/vscode-markdown-pdf/issues/436), [#451](https://github.com/yzane/vscode-markdown-pdf/issues/451), [#461](https://github.com/yzane/vscode-markdown-pdf/issues/461), [review, Jun 2026](https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf&ssr=false#review-details) | Uses your installed browser with a fresh profile. If it cannot start, the built-in engine makes the PDF and the message says so. |
 | "Silently fails." | [review, May 2026](https://marketplace.visualstudio.com/items?itemName=yzane.markdown-pdf&ssr=false#review-details) | Every export ends with a message: the saved file, or what went wrong. Details go to the Markdown Export output panel. |
 | No Word export. | [#439](https://github.com/yzane/vscode-markdown-pdf/issues/439) | Word (.docx) with real Word styles. |

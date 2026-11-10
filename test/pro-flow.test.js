@@ -193,3 +193,19 @@ test('walkthrough sample: copied to the extension storage and opened; exports la
     assert.equal(s.log.error.length, 0);
   } finally { s.restore(); }
 });
+
+test('walkthrough sample with a vscode-userdata storage URI: opened as a plain file, so exports need no save dialog', async () => {
+  const { loadExtension: load } = require('./support/vscode-stub');
+  const s = load({ workspace: ws, storageScheme: 'vscode-userdata' });
+  s.config.askForRating = false; s.config.pdfEngine = 'builtin';
+  s.ext.activate(s.context);
+  try {
+    await cmd(s, 'openSample');
+    const doc = s.log.opened[0];
+    assert.equal(doc.uri.scheme, 'file');
+    s.vscode.window.activeTextEditor = { document: doc, selection: { isEmpty: true } };
+    await cmd(s, 'exportPdf');
+    assert.ok(fs.existsSync(path.join(s.gs, 'sample', 'release-notes.pdf')));
+    assert.equal(s.log.saveDialogs, undefined, 'no save dialog');
+  } finally { s.restore(); }
+});

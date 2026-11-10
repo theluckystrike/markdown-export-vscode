@@ -492,13 +492,11 @@ function showPreview(arg) {
 // The bundled sample is copied to the extension's own storage folder, so exports land next to it there and never in
 // the extension folder. Exports of this copy do not count for the rating ask (rate.js skips globalStorageUri).
 async function openSample() {
-  const srcDir = vscode.Uri.joinPath(ctx.extensionUri, 'walkthrough', 'sample');
-  const dst = vscode.Uri.joinPath(ctx.globalStorageUri, 'sample');
-  await vscode.workspace.fs.createDirectory(dst);
-  for (const name of ['release-notes.md', 'zovo-logo.png']) {
-    await vscode.workspace.fs.copy(vscode.Uri.joinPath(srcDir, name), vscode.Uri.joinPath(dst, name), { overwrite: true });
-  }
-  const doc = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(dst, 'release-notes.md'));
+  // globalStorageUri can use the vscode-userdata scheme; exports need a plain file path, so use its path on disk.
+  const dst = path.join(ctx.globalStorageUri.fsPath, 'sample');
+  fs.mkdirSync(dst, { recursive: true });
+  for (const name of ['release-notes.md', 'zovo-logo.png']) fs.copyFileSync(path.join(ctx.extensionPath, 'walkthrough', 'sample', name), path.join(dst, name));
+  const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(path.join(dst, 'release-notes.md')));
   await vscode.window.showTextDocument(doc, { preview: false });
 }
 
