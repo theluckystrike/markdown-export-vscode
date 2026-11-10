@@ -9,5 +9,5 @@
 !dist/worker.js
 !dist/*.LEGAL.txt
 !media/**
-!images/export-menu.png
+!images/*.png
 !walkthrough/**

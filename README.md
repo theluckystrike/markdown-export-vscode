@@ -1,6 +1,6 @@
-# Markdown Export to PDF & Word (DOCX, HTML, No Chromium Download)
+# Markdown to PDF & Markdown to Word (DOCX, HTML Export, No Chromium Download)
 
-Export Markdown to PDF, Word (.docx) and HTML from VS Code. PDFs are printed by the Chrome, Edge or Brave already on your computer, so there is nothing to download. Free, no sign-in, works offline.
+Markdown to PDF, Markdown to Word (.docx) and Markdown to HTML, right in VS Code. PDFs are printed by the Chrome, Edge or Brave already on your computer, so there is nothing to download. Free, no sign-in, works offline.
 
 ![A release guide open in VS Code with the Export Preview beside it and the message "Saved release-guide.pdf with Google Chrome."](images/hero.png)
 
@@ -13,7 +13,9 @@ Export Markdown to PDF, Word (.docx) and HTML from VS Code. PDFs are printed by 
 
 Open a Markdown file and click the export button in the editor title bar, or press `Cmd+Alt+E` (macOS) or `Ctrl+Alt+E`. Pick PDF, Word (DOCX), HTML or all three. The file is saved next to the Markdown file.
 
-You can also right-click a Markdown file in the Explorer (Markdown Export menu), select several files, right-click a folder (Export Every Markdown File in a Folder), or select text and choose Export Selection.
+You can also right-click a Markdown file in the Explorer (Markdown Export menu), select several files, right-click a folder (Export Every Markdown File in a Folder), or select text and choose Export Selection. From the Command Palette, the folder export lists your workspace folders and every folder that holds Markdown files, so you do not have to browse for it.
+
+New to it? Get Started (in the Command Palette: Markdown Export: Get Started) opens a sample with a table, code, a formula and a Mermaid diagram to try the export on.
 
 ![The export menu: PDF with Google Chrome, Word, HTML, all three, and Export Preview](images/export-menu.png)
 
@@ -87,19 +89,21 @@ Tested in VS Code on an Apple Silicon Mac with a 5 MB Markdown file: the PDF (2,
 - No telemetry, no account, no ads.
 - No network request while you export, unless you turn on `markdownExport.allowRemoteImages`. Three locks keep it that way: a page security policy, a blocked proxy in the hidden browser, and a request filter.
 - `<script>` tags, `onclick`-style attributes and `javascript:` links in the Markdown are removed, and the page policy blocks any script that is left. The exported HTML file carries a policy that runs no scripts.
-- The only call the extension can make is one question to GitHub, when you choose Unlock Zovo Pro with GitHub Sponsors.
+- The only call the extension can make is one question to GitHub, when you choose I already paid: unlock with GitHub Sponsors.
 
 ## Free and Pro
 
-Every export to PDF, Word and HTML is free: one file, a selection, several files or a whole folder.
+Every export to PDF, Word and HTML is free: one file, a selection, several files or a whole folder, with the preview, table of contents, header, footer, math and Mermaid.
 
-Zovo Pro adds three extras. Each has 3 free tries:
+Zovo Pro adds three tools for longer documents. Each has 3 free tries on your computer:
 
 - Merge a folder into one PDF, each file on a new page, with one outline.
 - Word template. Word exports take the fonts, colours and spacing of your own .docx or .dotx (`markdownExport.docxTemplate`).
 - Cover page from the front matter title, subtitle, author and date (`cover: true`).
 
-Zovo Pro is USD 19 once on GitHub Sponsors (the "$19 one time" tier: https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878). It unlocks the Pro features in every Zovo VS Code extension. If you bought that tier, or sponsor monthly with USD 10 or more, run Unlock Zovo Pro with GitHub Sponsors.
+A try is used only when a file was saved with the tool. One export run uses one try per tool, even for a whole folder. If you cancel, or the export fails, the try stays. After the third try, the next use of that tool shows what Zovo Pro is, once, and the export still runs without the Pro part if you cancel. Nothing about Pro appears on its own. Set `markdownExport.showProFeatures` to `false` to hide the Pro command and the Zovo Pro commands.
+
+Zovo Pro is USD 19 once on GitHub Sponsors (the "$19 one time" tier: https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878), or by PayPal (Zovo Pro: Pay for Zovo Pro with PayPal). It turns on the Pro tools in every Zovo VS Code extension. If you bought that tier, or sponsor monthly with USD 10 or more, run Zovo Pro: I already paid: unlock with GitHub Sponsors.
 
 ## Settings
 
@@ -123,18 +127,24 @@ VS Code 1.90 or later, Cursor, Windsurf and VSCodium, on macOS, Windows and Linu
 
 ## Support Zovo
 
-Zovo extensions are free, with no ads and no tracking. They are made by [theluckystrike](https://github.com/theluckystrike) on GitHub. If this one saves you time, you can support the work:
+Zovo Pro: USD 19 once, every Zovo viewer. [Get Zovo Pro on GitHub Sponsors](https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878) to turn on the Pro tools in this extension and in the other Zovo extensions you use. The free features stay free.
+
+Zovo extensions have no ads and no tracking. They are made by [theluckystrike](https://github.com/theluckystrike) on GitHub. You can also support the work with no Pro:
 
 - [Sponsor on GitHub](https://github.com/sponsors/theluckystrike)
 - [PayPal](https://www.paypal.com/paypalme/najzzz)
 - [Follow theluckystrike on GitHub](https://github.com/theluckystrike)
 
+### Need your format supported?
+
+Open a [format request](https://github.com/theluckystrike/markdown-export-vscode/issues/new?template=format-request.yml) with a sample file, and I reply there whether it can be done. For USD 299 once, through [this GitHub Sponsors tier](https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679995), I add your file format or a missing feature to this extension, with tests, within 7 days.
+
 ## More tools by Zovo
 
-- [PDF Viewer & Reader to Read and View PDF in Dark Mode](https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark) reads PDFs with a real dark mode, search, an outline and thumbnails.
+- [PDF Viewer & PDF Reader to Read and View PDF (Dark Mode)](https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark) reads PDFs with a real dark mode, search, an outline and thumbnails.
 - [DOCX Viewer & ODT Viewer, Word Document Preview (Dark Mode)](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) previews Word and ODT files with dark mode, an outline and search.
 - [PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow](https://marketplace.visualstudio.com/items?itemName=zovo.pptx-slide-viewer) shows PowerPoint slides, thumbnails and speaker notes.
-- [XLSX Viewer & CSV Preview for Excel, XLS & Parquet](https://marketplace.visualstudio.com/items?itemName=zovo.table-viewer-vscode) opens CSV, TSV, Excel and Parquet files as a sortable, filterable table.
-- [Graphviz Viewer & DOT Viewer (Live Preview)](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-graphviz-preview) shows a live preview of DOT files and exports SVG or PNG.
+- [EML Viewer, Email Headers & MBOX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.eml-viewer) reads EML, EMLX and MBOX email files with remote images blocked.
+- [RTF Viewer & Rich Text Viewer (RTF Preview, Dark Mode)](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-rtf-viewer) opens RTF files as a read-only page with tables, pictures and search.
 
 See [all Zovo extensions on the Marketplace](https://marketplace.visualstudio.com/publishers/zovo).

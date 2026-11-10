@@ -1,8 +1,8 @@
 {
   "name": "zovo-markdown-export",
-  "displayName": "Markdown Export to PDF & Word (DOCX, HTML, No Chromium Download)",
-  "description": "Export Markdown to PDF, Word (DOCX) and HTML with the Chrome, Edge or Brave you already have. Nothing to download, works offline. Math, Mermaid, code colours, tables, footnotes, headers, page numbers and a table of contents. Built-in PDF engine when no browser is installed.",
-  "version": "0.1.0",
+  "displayName": "Markdown to PDF & Markdown to Word (DOCX, HTML Export, No Chromium Download)",
+  "description": "Markdown to PDF, Markdown to Word (DOCX) and Markdown to HTML export with the Chrome, Edge or Brave you already have. Nothing to download, works offline. Math, Mermaid, code colours, tables, footnotes, headers, page numbers and a table of contents. Built-in PDF engine when no browser is installed.",
+  "version": "0.1.1",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -19,13 +19,16 @@
     "Other"
   ],
   "keywords": [
-    "markdown pdf",
     "markdown to pdf",
-    "export pdf",
+    "markdown pdf",
+    "md to pdf",
+    "markdown export",
+    "export markdown",
     "markdown to word",
     "markdown to docx",
     "markdown to html",
-    "markdown export",
+    "markdown pdf export",
+    "convert markdown to pdf",
     "pdf export",
     "docx",
     "word",
@@ -106,6 +109,11 @@
         "category": "Markdown Export"
       },
       {
+        "command": "markdownExport.openSample",
+        "title": "Open a Sample Markdown File",
+        "category": "Markdown Export"
+      },
+      {
         "command": "markdownExport.openWalkthrough",
         "title": "Get Started",
         "category": "Markdown Export"
@@ -122,23 +130,28 @@
       },
       {
         "command": "markdownExport.getPro",
-        "title": "Get Zovo Pro (USD 19 once, all Zovo extensions)",
-        "category": "Markdown Export"
+        "title": "Get Zovo Pro (USD 19 once, all 22 Zovo extensions)",
+        "category": "Zovo Pro"
       },
       {
         "command": "markdownExport.unlockWithSponsors",
-        "title": "Unlock Zovo Pro with GitHub Sponsors",
-        "category": "Markdown Export"
+        "title": "I already paid: unlock with GitHub Sponsors",
+        "category": "Zovo Pro"
       },
       {
         "command": "markdownExport.enterLicenseKey",
-        "title": "Enter Zovo Pro License Key",
-        "category": "Markdown Export"
+        "title": "Enter Zovo Pro license key",
+        "category": "Zovo Pro"
       },
       {
         "command": "markdownExport.removeLicense",
-        "title": "Remove Zovo Pro from This Editor",
-        "category": "Markdown Export"
+        "title": "Remove Zovo Pro from this editor",
+        "category": "Zovo Pro"
+      },
+      {
+        "command": "markdownExport.payWithPayPal",
+        "title": "Pay for Zovo Pro with PayPal (USD 19, team of 5 USD 59)",
+        "category": "Zovo Pro"
       }
     ],
     "submenus": [
@@ -257,6 +270,10 @@
         {
           "command": "markdownExport.removeLicense",
           "when": "config.markdownExport.showProFeatures"
+        },
+        {
+          "command": "markdownExport.payWithPayPal",
+          "when": "config.markdownExport.showProFeatures"
         }
       ]
     },
@@ -269,7 +286,7 @@
       }
     ],
     "configuration": {
-      "title": "Markdown Export",
+      "title": "Markdown to PDF & Word Export",
       "properties": {
         "markdownExport.pdfEngine": {
           "type": "string",
@@ -442,18 +459,19 @@
     "walkthroughs": [
       {
         "id": "markdownExport.start",
-        "title": "Get started with Markdown Export",
+        "title": "Get started with Markdown to PDF and Word",
         "description": "Turn Markdown into PDF, Word and HTML with the browser you already have. Nothing to download.",
         "steps": [
           {
-            "id": "export",
-            "title": "Export the open file",
-            "description": "Open a Markdown file and click the export button in the editor title bar (or press Cmd+Alt+E / Ctrl+Alt+E). Pick PDF, Word or HTML.\n[Find a Markdown file](command:workbench.action.quickOpen?%5B%22.md%22%5D)",
+            "id": "sample",
+            "title": "Export a sample to PDF, Word or HTML",
+            "description": "Open a sample with a table, code, a formula and a Mermaid diagram. Then click the export button in the editor title bar (or press Cmd+Alt+E / Ctrl+Alt+E) and pick PDF, Word or HTML.\n[Open the sample](command:markdownExport.openSample)",
             "media": {
               "image": "images/export-menu.png",
               "altText": "The export menu over a Markdown file with PDF, Word, HTML and all three."
             },
             "completionEvents": [
+              "onCommand:markdownExport.openSample",
               "onCommand:markdownExport.exportMenu",
               "onCommand:markdownExport.exportPdf"
             ]
@@ -461,7 +479,7 @@
           {
             "id": "preview",
             "title": "Check the pages first",
-            "description": "The Export Preview shows the document on paper, with the page size and margins of the PDF.\n[Open Export Preview](command:markdownExport.showPreview)",
+            "description": "The Export Preview shows the document on paper, with the page size and margins of the PDF. Front matter or settings change paper, margins, header and footer.\n[Open Export Preview](command:markdownExport.showPreview)",
             "media": {
               "markdown": "walkthrough/preview.md"
             },
@@ -481,15 +499,12 @@
             ]
           },
           {
-            "id": "settings",
-            "title": "Paper, margins, header and footer",
-            "description": "Set the page size, margins, header, footer and table of contents for all files, or per file in front matter.\n[Open settings](command:workbench.action.openSettings?%5B%22markdownExport%22%5D)",
+            "id": "zovo-related",
+            "title": "Files that often come with Markdown files",
+            "description": "If your project also has PDF files or Word documents, these free Zovo extensions open them. A link opens the extension page, and you choose there whether to install it.\n[PDF Viewer](command:extension.open?%5B%22zovo.pdf-viewer-dark%22%5D)\n[DOCX Viewer](command:extension.open?%5B%22zovo.docx-viewer-vscode%22%5D)",
             "media": {
-              "markdown": "walkthrough/settings.md"
-            },
-            "completionEvents": [
-              "onCommand:workbench.action.openSettings"
-            ]
+              "markdown": "walkthrough/related.md"
+            }
           }
         ]
       }
@@ -520,6 +535,6 @@
     "url": "https://github.com/theluckystrike/markdown-export-vscode"
   },
   "sponsor": {
-    "url": "https://github.com/sponsors/theluckystrike"
+    "url": "https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878"
   }
 }

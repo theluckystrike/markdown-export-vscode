@@ -1,5 +1,5 @@
 'use strict';
-// Markdown Export: PDF, Word (DOCX) and HTML from Markdown, with the browser the user already has.
+// Markdown to PDF & Markdown to Word: PDF, Word (DOCX) and HTML from Markdown, with the browser the user already has.
 // No download, no telemetry, no network (unless the user turns on remote images, or clicks Unlock with GitHub Sponsors).
 const vscode = require('vscode');
 const fs = require('fs');
@@ -94,25 +94,25 @@ async function outputPath(src, ext, suffix = '') {
 }
 
 // ---- Pro extras for one file ------------------------------------------------------------------------------------
-async function proFor(src, uri, kind) {
+// run = { decided: {feature: boolean} } lives for one export run: the panel shows at most once per run and per tool,
+// and a free try is counted after the run saved at least one file that used the tool (runExports).
+async function proFor(src, uri, kind, run) {
   const s = settings(uri);
   const fm = splitFrontMatter(src.text);
   const o = resolveOptions(s, fm.data);
-  const res = { cover: false, template: '', notes: [] };
+  const res = { cover: false, template: '', notes: [], uses: [] };
+  const decide = async (f) => {
+    if (!(f in run.decided)) run.decided[f] = await pro.allowed(f);
+    return run.decided[f];
+  };
   if (o.cover) {
-    const g = await pro.gate('cover');
-    if (g.ok) res.cover = true; else res.notes.push('Cover page skipped (Pro).');
-    if (g.note) res.notes.push(g.note);
+    if (await decide('cover')) { res.cover = true; res.uses.push('cover'); } else res.notes.push('Cover page skipped (Pro).');
   }
   if (kind === 'docx' && o.docxTemplate) {
     let t = expandVars(o.docxTemplate, src.docPath);
     if (!path.isAbsolute(t) && src.docPath) t = path.resolve(path.dirname(src.docPath), t);
     if (!fs.existsSync(t)) res.notes.push(`Word template not found: ${t}`);
-    else {
-      const g = await pro.gate('template');
-      if (g.ok) res.template = t; else res.notes.push('Word template skipped (Pro).');
-      if (g.note) res.notes.push(g.note);
-    }
+    else if (await decide('template')) { res.template = t; res.uses.push('template'); } else res.notes.push('Word template skipped (Pro).');
   }
   return res;
 }
@@ -122,8 +122,9 @@ async function proFor(src, uri, kind) {
  * jobs: [{ uri, src?, formats: ['pdf','docx','html'], suffix?, title? }]
  * Returns the list of results. One browser serves all jobs.
  */
-async function runExports(jobs, title) {
+async function runExports(jobs, title, proRun) {
   const results = [];
+  const run = { decided: {}, ...(proRun || {}) };
   const first = jobs[0] && jobs[0].uri;
   const session = newSession(first);
   const total = jobs.reduce((n, j) => n + j.formats.length, 0);
@@ -144,9 +145,10 @@ async function runExports(jobs, title) {
         log(`Start ${FORMATS[kind]}: ${target}`);
         const t0 = Date.now();
         try {
-          const proOpts = await proFor(src, job.uri, kind);
+          const proOpts = await proFor(src, job.uri, kind, run);
           const r = await session[kind]({ text: src.text, docPath: src.docPath, outPath: target, pro: proOpts, title: job.title, frontMatter: job.frontMatter });
           r.ms = Date.now() - t0; r.outPath = target; r.kind = kind; r.uri = job.uri; r.notes = proOpts.notes;
+          r.proUses = proOpts.uses.filter((f) => !(f === 'template' && r.templateUsed === false)); // a template that could not be read uses no try
           results.push(r);
           log(`${FORMATS[kind]}: ${target} (${(r.bytes / 1024).toFixed(0)} KB, ${r.engine === 'browser' && kind === 'pdf' ? r.browser : 'built-in engine'}, ${r.ms} ms)`);
           for (const w of [...r.warnings, ...r.notes]) log(`  note: ${w}`);
@@ -161,6 +163,12 @@ async function runExports(jobs, title) {
   }).then(undefined, (e) => log(`Export stopped: ${e.message}`));
   await session.close();
   const ok = results.filter((r) => !r.error);
+  // A Pro try counts only now, after a saved file used the tool; one try per tool and run.
+  const usedTools = [...new Set([...(run.extraUses || []), ...ok.flatMap((r) => r.proUses || [])])];
+  for (const f of ok.length ? usedTools : []) {
+    const note = await pro.produced(f);
+    if (note) { ok[0].proNotes = [...(ok[0].proNotes || []), note]; log(`  note: ${note}`); vscode.window.setStatusBarMessage(note, 8000); }
+  }
   if (ok.length && !failed) {
     // one success per exported source file; the rating module ignores repeats inside one session
     rating.success(jobs[0].uri);
@@ -180,7 +188,7 @@ async function report(results, label) {
     return;
   }
   const mode = cfg().get('openAfterExport') || 'notify';
-  const warnings = ok.flatMap((r) => [...r.warnings, ...(r.notes || [])]);
+  const warnings = [...new Set(ok.flatMap((r) => [...r.warnings, ...(r.notes || [])]))];
   if (mode === 'open' && ok.length === 1) { await vscode.env.openExternal(vscode.Uri.file(ok[0].outPath)); return; }
   if (mode === 'none') return;
   const one = ok.length === 1 ? ok[0] : null;
@@ -188,6 +196,8 @@ async function report(results, label) {
   const how = engine ? (engine.engine === 'browser' ? ` with ${engine.browser}` : ' with the built-in engine') : '';
   let msg = one ? `Saved ${path.basename(one.outPath)}${how}.` : `${label || 'Exported'}: ${ok.length} files saved${how}.`;
   if (warnings.length) msg += ` ${warnings.length === 1 ? warnings[0] : `${warnings.length} notes in the output.`}`;
+  const proNotes = ok.flatMap((r) => r.proNotes || []);
+  if (proNotes.length) msg += ` ${proNotes.join(' ')}`;
   const buttons = one ? ['Open', 'Show in Folder'] : ['Show in Folder'];
   if (warnings.length > 1) buttons.push('Show Notes');
   const pick = await (warnings.length ? vscode.window.showWarningMessage(msg, ...buttons) : vscode.window.showInformationMessage(msg, ...buttons));
@@ -250,18 +260,42 @@ async function findMarkdown(folder, token) {
   return uris.sort((a, b) => a.fsPath.localeCompare(b.fsPath, undefined, { numeric: true, sensitivity: 'base' }));
 }
 
-async function pickFolder(arg) {
+// A folder from the Explorer menu, or a quick pick of the workspace folders and the folders that hold Markdown files
+// (no native dialog needed); "Choose another folder..." opens the system dialog.
+async function pickFolder(arg, verb = 'Export') {
   if (arg instanceof vscode.Uri) {
     try { if ((await vscode.workspace.fs.stat(arg)).type & vscode.FileType.Directory) return arg; } catch (e) { /* not a folder */ }
     return vscode.Uri.file(path.dirname(arg.fsPath));
   }
   const ws = vscode.workspace.workspaceFolders || [];
-  const pick = await vscode.window.showOpenDialog({ canSelectFolders: true, canSelectFiles: false, defaultUri: ws[0] && ws[0].uri, openLabel: 'Use This Folder' });
-  return pick && pick[0];
+  const items = [];
+  if (ws.length) {
+    const seen = new Map();
+    for (const w of ws) seen.set(w.uri.fsPath, { uri: w.uri, n: 0, root: true });
+    let found = [];
+    try { found = await vscode.workspace.findFiles('**/*.{md,markdown,mdown,mkd}', '{**/node_modules/**,**/.git/**,**/.venv/**,**/dist/**}', 2000); } catch (e) { /* none */ }
+    for (const u of found) {
+      const d = path.dirname(u.fsPath);
+      if (!seen.has(d)) { if (seen.size >= 60) continue; seen.set(d, { uri: vscode.Uri.file(d), n: 0 }); }
+      seen.get(d).n++;
+    }
+    const sorted = [...seen.values()].sort((a, b) => (b.root ? 1 : 0) - (a.root ? 1 : 0) || a.uri.fsPath.localeCompare(b.uri.fsPath, undefined, { numeric: true, sensitivity: 'base' }));
+    for (const e of sorted) {
+      const wf = vscode.workspace.getWorkspaceFolder(e.uri);
+      const rel = wf && !e.root ? path.relative(wf.uri.fsPath, e.uri.fsPath) : path.basename(e.uri.fsPath);
+      items.push({ label: `$(folder) ${rel}`, description: e.root ? 'workspace folder, with subfolders' : `${e.n} Markdown file${e.n === 1 ? '' : 's'} here, with subfolders`, uri: e.uri });
+    }
+  }
+  items.push({ label: '$(folder-opened) Choose another folder...', other: true });
+  const pick = ws.length ? await vscode.window.showQuickPick(items, { title: `${verb}: which folder?`, placeHolder: 'Every Markdown file in the folder and its subfolders' }) : { other: true };
+  if (!pick) return undefined;
+  if (pick.uri) return pick.uri;
+  const chosen = await vscode.window.showOpenDialog({ canSelectFolders: true, canSelectFiles: false, defaultUri: ws[0] && ws[0].uri, openLabel: 'Use This Folder' });
+  return chosen && chosen[0];
 }
 
 async function exportFolder(arg) {
-  const folder = await pickFolder(arg);
+  const folder = await pickFolder(arg, 'Export every Markdown file');
   if (!folder) return;
   const files = await findMarkdown(folder);
   if (!files.length) { vscode.window.showInformationMessage(`No Markdown files in ${path.basename(folder.fsPath)}.`); return; }
@@ -275,20 +309,18 @@ async function exportFolder(arg) {
 }
 
 async function exportFolderMergedPdf(arg) {
-  const folder = await pickFolder(arg);
+  if (!(await pro.allowed('merge'))) return;
+  const folder = await pickFolder(arg, 'Merge into one PDF');
   if (!folder) return;
   const files = await findMarkdown(folder);
   if (!files.length) { vscode.window.showInformationMessage(`No Markdown files in ${path.basename(folder.fsPath)}.`); return; }
-  const g = await pro.gate('merge');
-  if (!g.ok) return;
   const parts = [];
   for (const u of files) { try { parts.push({ path: u.fsPath, text: await fs.promises.readFile(u.fsPath, 'utf8') }); } catch (e) { log(`Skipped ${u.fsPath}: ${e.message}`); } }
   const text = mergeMarkdown(parts);
   const name = path.basename(folder.fsPath);
   const docPath = path.join(folder.fsPath, `${name}.md`);
   const outPath = path.join(path.dirname(await outputPath({ docPath, text }, 'pdf')), `${name}.pdf`);
-  const results = await runExports([{ uri: folder, src: { text, docPath, name: `${name}.md` }, formats: ['pdf'], outPath, title: name }], `Merging ${files.length} files into one PDF`);
-  for (const r of results) if (!r.error && g.note) r.notes = [...(r.notes || []), g.note];
+  const results = await runExports([{ uri: folder, src: { text, docPath, name: `${name}.md` }, formats: ['pdf'], outPath, title: name }], `Merging ${files.length} files into one PDF`, { extraUses: ['merge'] });
   await report(results, `Merged ${files.length} files`);
 }
 
@@ -376,7 +408,6 @@ class Preview {
     const base = wv.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, 'media')).toString();
     const engine = engineLabel(this.uri);
     const notice = big ? `<div class="engine-note">This file is ${(Buffer.byteLength(src.text) / 1048576).toFixed(1)} MB. The preview shows the first 200 KB and refreshes on save. Exports use the whole file.</div>` : '';
-    const coverNote = o.cover && !pro.isPro() ? ` <span class="pro-tag" title="Pro, ${pro.triesLeft('cover')} free tries left">Pro</span>` : '';
     const page = buildPage({
       text, frontMatter: fm, docPath: src.docPath, options: o, mode: 'webview', assetsDir: path.join(ctx.extensionPath, 'media'),
       webviewBase: base, cspSource: wv.cspSource, allowCover: o.cover,
@@ -386,7 +417,7 @@ class Preview {
 <style>.sheet{width:${o.paper.width}mm;padding:${o.margin.top}mm ${o.margin.right}mm ${o.margin.bottom}mm ${o.margin.left}mm}</style>
 <header class="bar" role="toolbar" aria-label="Export">
   <button data-export="pdf" title="Export to PDF">PDF</button><button data-export="docx" title="Export to Word">Word</button><button data-export="html" title="Export to HTML">HTML</button>
-  <span class="engine" title="${escapeAttr(`${o.pageSize}${o.landscape ? ' landscape' : ''}, PDF ${engine}`)}">${escapeHtml(o.pageSize)}${o.landscape ? ' landscape' : ''} · PDF ${escapeHtml(engine)}${coverNote}</span>
+  <span class="engine" title="${escapeAttr(`${o.pageSize}${o.landscape ? ' landscape' : ''}, PDF ${engine}`)}">${escapeHtml(o.pageSize)}${o.landscape ? ' landscape' : ''} · PDF ${escapeHtml(engine)}</span>
   <button data-paper title="Switch between white paper and the editor theme">${this.paper === 'theme' ? 'Theme colours' : 'White paper'}</button>
   <button data-settings title="Page size, margins, header, footer">Settings</button>
 </header>${notice}<main class="desk"><div class="sheet">`,
@@ -427,7 +458,6 @@ html.mode-webview body{background:var(--vscode-editor-background);color:var(--fg
 .bar button[data-paper],.bar button[data-settings]{color:var(--vscode-button-secondaryForeground,var(--vscode-foreground));background:var(--vscode-button-secondaryBackground,transparent)}
 .bar button{white-space:nowrap;flex:none}
 .bar .engine{flex:1 1 auto;margin-left:6px;color:var(--vscode-descriptionForeground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.pro-tag{font-size:10px;border:1px solid var(--vscode-descriptionForeground);border-radius:3px;padding:0 3px;margin-left:4px}
 .desk{padding:16px 16px 40px}
 .sheet{margin:0 auto;background:var(--bg);color:var(--fg);box-shadow:0 1px 6px rgba(0,0,0,.35);min-height:60vh}
 body.paper-theme .sheet{box-shadow:none;border:1px solid var(--vscode-panel-border,#8884)}
@@ -458,12 +488,26 @@ function showPreview(arg) {
   currentPreview = new Preview(uri);
 }
 
+// ---- walkthrough sample -------------------------------------------------------------------------------------------
+// The bundled sample is copied to the extension's own storage folder, so exports land next to it there and never in
+// the extension folder. Exports of this copy do not count for the rating ask (rate.js skips globalStorageUri).
+async function openSample() {
+  const srcDir = vscode.Uri.joinPath(ctx.extensionUri, 'walkthrough', 'sample');
+  const dst = vscode.Uri.joinPath(ctx.globalStorageUri, 'sample');
+  await vscode.workspace.fs.createDirectory(dst);
+  for (const name of ['release-notes.md', 'zovo-logo.png']) {
+    await vscode.workspace.fs.copy(vscode.Uri.joinPath(srcDir, name), vscode.Uri.joinPath(dst, name), { overwrite: true });
+  }
+  const doc = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(dst, 'release-notes.md'));
+  await vscode.window.showTextDocument(doc, { preview: false });
+}
+
 // ---- activate ----------------------------------------------------------------------------------------------------
 function activate(context) {
   ctx = context;
   out = vscode.window.createOutputChannel('Markdown Export');
   context.subscriptions.push(out);
-  rating = createRatingPrompt({ vscode, context, extensionId: EXT_ID, section: PREFIX, name: 'Markdown Export' });
+  rating = createRatingPrompt({ vscode, context, extensionId: EXT_ID, section: PREFIX, name: 'Markdown to PDF' });
   support.registerSupport({ vscode, context, prefix: PREFIX, selfId: EXT_ID });
   pro = createPro({ vscode, context });
   if (pro.license) context.subscriptions.push(vscode.window.registerUriHandler({ handleUri: (u) => pro.license.handleUri(u) }));
@@ -478,6 +522,7 @@ function activate(context) {
   reg('exportFolderMergedPdf', (a) => exportFolderMergedPdf(a));
   reg('showPreview', (a) => showPreview(a));
   reg('showEngine', () => showEngine());
+  reg('openSample', () => openSample().catch((e) => vscode.window.showErrorMessage(`Could not open the sample: ${e.message}`)));
   reg('openWalkthrough', () => vscode.commands.executeCommand('workbench.action.openWalkthrough', `${EXT_ID}#${PREFIX}.start`, false));
 }
 

@@ -398,13 +398,27 @@ async function buildDocx(model, ctx) {
 }
 
 /** word/styles.xml from a reference .docx (Pro: custom template). */
+// A Word template is untrusted input: the file and its styles.xml are size-capped (zip bombs), only styles.xml is read.
+const MAX_TEMPLATE_BYTES = 50 * 1024 * 1024;
+const MAX_STYLES_BYTES = 16 * 1024 * 1024;
 async function stylesFromTemplate(buffer) {
   const { unzipSync, strFromU8 } = require('fflate');
-  let files;
-  try { files = unzipSync(new Uint8Array(buffer), { filter: (f) => f.name === 'word/styles.xml' }); } catch (e) { throw new Error('The template is not a .docx or .dotx file.'); }
+  if (!buffer || buffer.length > MAX_TEMPLATE_BYTES) throw new Error('The template is larger than 50 MB.');
+  let files; let tooBig = false;
+  try {
+    files = unzipSync(new Uint8Array(buffer), {
+      filter: (f) => {
+        if (f.name !== 'word/styles.xml') return false;
+        if (!(f.originalSize >= 0 && f.originalSize <= MAX_STYLES_BYTES) || f.size > MAX_STYLES_BYTES) { tooBig = true; return false; }
+        return true;
+      },
+    });
+  } catch (e) { throw new Error('The template is not a .docx or .dotx file.'); }
+  if (tooBig) throw new Error('The styles in the template are larger than 16 MB.');
   const f = files['word/styles.xml'];
   if (!f) throw new Error('The template has no word/styles.xml. Pick a .docx or .dotx file saved by Word or LibreOffice.');
+  if (f.length > MAX_STYLES_BYTES) throw new Error('The styles in the template are larger than 16 MB.');
   return strFromU8(f);
 }
 
-module.exports = { buildDocx, stylesFromTemplate, bookmarkName };
+module.exports = { buildDocx, stylesFromTemplate, bookmarkName, MAX_TEMPLATE_BYTES, MAX_STYLES_BYTES };

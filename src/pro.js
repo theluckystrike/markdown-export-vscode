@@ -1,57 +1,65 @@
 'use strict';
-// Zovo Pro for Markdown Export. Pro adds three extras: merge a folder into one PDF, a Word template, and a
-// cover page. Every export to PDF, Word and HTML (one file, a selection or a whole folder) stays free.
-// Each Pro feature has 3 free tries per computer (local counter, no network). After that, one modal explains
-// it, only when the user starts that feature. Nothing about Pro shows on its own.
+// Zovo Pro for Markdown to PDF, on top of the shared license module (src/license, copied unchanged from
+// factory/sprint/license by apply.sh). Pro adds three tools: merge a folder into one PDF, a Word template, and a cover
+// page. Every export to PDF, Word and HTML (one file, a selection, several files or a whole folder) stays free.
+// Each Pro tool has 3 free tries on this computer (local counter, no network). A try counts only after the tool
+// produced its output (a saved file); Escape, Cancel or a failed export never uses one. One export run uses at most
+// one try per tool, even for a folder. The panel appears only when the user starts a tool with no tries left.
+// Nothing about Pro shows on its own: no popup, toast, badge or tab on open or activation.
 const { createLicense } = require('./license');
 
-const PRO_ENABLED = true; // false: every Pro feature is free and no Pro text shows anywhere
+const SKU = 'mdexport-pro';
 const FREE_TRIES = 3;
 const TRIES_KEY = 'zovo.mdexport.proTries.v1';
 
 const FEATURES = {
-  merge: { name: 'Merge a folder into one PDF', detail: 'Joins every Markdown file in a folder into one PDF, each file on a new page, with one outline.' },
-  template: { name: 'Word template', detail: 'Word exports take the fonts, heading colours and spacing of your own .docx or .dotx file.' },
-  cover: { name: 'Cover page', detail: 'Starts PDF, Word and HTML exports with a title page from the front matter title, subtitle, author and date.' },
+  merge: {
+    title: 'Merge a folder into one PDF',
+    detail: 'Joins every Markdown file in a folder into one PDF, each file on a new page, with one outline.',
+  },
+  template: {
+    title: 'Word template',
+    detail: 'Word exports take the fonts, heading colours and spacing of your own .docx or .dotx file.',
+  },
+  cover: {
+    title: 'Cover page',
+    detail: 'Starts PDF, Word and HTML exports with a title page from the front matter title, subtitle, author and date.',
+  },
 };
+const TOOLS = Object.values(FEATURES).map((f) => f.title);
 
-const PRO_TEXT = 'Zovo Pro is USD 19 once on GitHub Sponsors and unlocks Pro in every Zovo extension. Bought it already, or sponsor monthly with USD 10 or more? Choose Unlock with GitHub Sponsors. Unlocking sends one question to GitHub, nothing else. Every export to PDF, Word and HTML stays free.';
+function createPro({ vscode, context, license, prefix = 'markdownExport', productName = 'Markdown to PDF' }) {
+  const lic = license || createLicense({ vscode, context, sku: SKU, name: 'Zovo', product: productName, commandPrefix: prefix, proTools: TOOLS });
 
-function createPro({ vscode, context, license }) {
-  const lic = license || (PRO_ENABLED ? createLicense({ vscode, context, sku: 'mdexport-pro', name: 'Zovo', commandPrefix: 'markdownExport' }) : null);
-  if (!lic) {
-    for (const c of ['getPro', 'unlockWithSponsors', 'enterLicenseKey', 'removeLicense']) {
-      context.subscriptions.push(vscode.commands.registerCommand(`markdownExport.${c}`, () => vscode.window.showInformationMessage('Everything in Markdown Export is free.')));
-    }
+  const used = (f) => Number((context.globalState.get(TRIES_KEY) || {})[f]) || 0;
+  const triesLeft = (f) => (FEATURES[f] ? Math.max(0, FREE_TRIES - used(f)) : 0);
+  const licensed = () => !!lic.isPro(SKU);
+
+  /** Before a Pro tool runs: true when it may run now (licensed, or a free try left). Otherwise the one panel. */
+  async function allowed(f) {
+    if (lic.ready) await lic.ready;
+    if (licensed()) { if (lic.refresh) Promise.resolve().then(() => lic.refresh()).catch(() => {}); return true; }
+    if (triesLeft(f) > 0) return true;
+    const feat = FEATURES[f] || { title: 'This tool', detail: '' };
+    return !!(await lic.requirePro(feat.title, { detail: feat.detail, triesUsed: used(f), tools: TOOLS }));
   }
-  const tries = () => Object.assign({}, context.globalState.get(TRIES_KEY) || {});
 
-  /**
-   * For a Pro feature the user started. Returns {ok, note}: ok true when it may run now; note is a short text
-   * for the result message ("free try 1 of 3").
-   */
-  async function gate(feature) {
-    if (!PRO_ENABLED || !lic) return { ok: true, note: '' };
-    await lic.ready;
-    if (lic.isPro()) { lic.refresh().catch(() => {}); return { ok: true, note: '' }; }
-    const t = tries();
-    const used = Number(t[feature]) || 0;
-    if (used < FREE_TRIES) {
-      t[feature] = used + 1;
-      await context.globalState.update(TRIES_KEY, t);
-      return { ok: true, note: `${FEATURES[feature].name} is Pro: free try ${used + 1} of ${FREE_TRIES}.` };
-    }
-    const f = FEATURES[feature];
-    const ok = await lic.requirePro(f.name, `${f.detail}\n\n${PRO_TEXT}`);
-    return { ok: !!ok, note: '' };
+  /** After the tool produced its output: counts one free try (nothing when licensed). Returns a short note or ''. */
+  async function produced(f) {
+    if (!FEATURES[f] || licensed()) return '';
+    const m = { ...(context.globalState.get(TRIES_KEY) || {}) };
+    m[f] = used(f) + 1;
+    await context.globalState.update(TRIES_KEY, m);
+    const l = triesLeft(f);
+    return `${FEATURES[f].title} is Zovo Pro: free try ${used(f)} of ${FREE_TRIES} used${l ? `, ${l} left` : ''}.`;
   }
 
   return {
-    gate,
-    isPro: () => !PRO_ENABLED || !lic || lic.isPro(),
-    triesLeft: (feature) => Math.max(0, FREE_TRIES - (Number(tries()[feature]) || 0)),
+    SKU, FEATURES, FREE_TRIES,
+    allowed, produced, triesLeft,
+    isPro: licensed,
     license: lic,
   };
 }
 
-module.exports = { createPro, PRO_ENABLED, FREE_TRIES, FEATURES, TRIES_KEY };
+module.exports = { createPro, FREE_TRIES, FEATURES, TRIES_KEY, SKU, TOOLS };

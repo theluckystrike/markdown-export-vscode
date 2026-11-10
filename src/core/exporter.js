@@ -243,7 +243,10 @@ class ExportSession {
     const title = this._title(options, model, job);
     let externalStyles;
     if (job.pro && job.pro.template) {
-      try { externalStyles = await stylesFromTemplate(fs.readFileSync(job.pro.template)); } catch (e) { warnings.push(`Template not used: ${e.message}`); }
+      try {
+        if (fs.statSync(job.pro.template).size > 50 * 1024 * 1024) throw new Error('The template is larger than 50 MB.');
+        externalStyles = await stylesFromTemplate(fs.readFileSync(job.pro.template));
+      } catch (e) { warnings.push(`Template not used: ${e.message}`); }
     }
     const canRaster = !!this.browserFor();
     const buf = await buildDocx(model, {
@@ -255,7 +258,7 @@ class ExportSession {
     fs.writeFileSync(tmp, buf);
     fs.renameSync(tmp, job.outPath);
     if (!canRaster && model.some((b) => b.type === 'mermaid')) warnings.push('Mermaid diagrams are shown as code in Word, because no Chrome, Edge or Brave was found.');
-    return { engine: canRaster ? 'browser' : 'builtin', warnings: dedupe(warnings), bytes: buf.length };
+    return { engine: canRaster ? 'browser' : 'builtin', warnings: dedupe(warnings), bytes: buf.length, templateUsed: !!externalStyles };
   }
 
   /** Standalone HTML. job: { text, docPath, outPath, pro: {cover} } */
