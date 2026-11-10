@@ -90,12 +90,12 @@ test('cover page: after 3 tries one panel per run; Cancel still exports without 
     const p = panels(s)[0];
     assert.equal(p.text, 'Cover page is part of Zovo Pro.');
     assert.equal(p.opts.modal, true);
-    assert.deepEqual(p.buttons.slice(0, 3), ['Get Zovo Pro, USD 19', 'Pay with PayPal', 'I already paid']);
+    assert.deepEqual(p.buttons.slice(0, 4), ['Pay by card (USD 19)', 'Get Zovo Pro with GitHub Sponsors', 'Pay with PayPal', 'Enter a key']);
     assert.match(p.opts.detail, /You used the 3 free tries/);
     assert.match(p.opts.detail, /Merge a folder into one PDF/);
     assert.match(p.opts.detail, /Word template/);
     assert.ok(!/refund/i.test(p.opts.detail));
-    assert.ok(!p.buttons.includes('Pay by card'));
+    assert.ok(!p.buttons.includes('Pay by card'), 'no Gumroad card button');
     assert.match(p.opts.detail, /USD 19/);
     assert.doesNotMatch(p.opts.detail, /USD 15/);
     const html = fs.readFileSync(COVER.replace(/\.md$/, '.html'), 'utf8');
@@ -105,11 +105,11 @@ test('cover page: after 3 tries one panel per run; Cancel still exports without 
   } finally { s.restore(); }
 });
 
-test('Get Zovo Pro in the panel opens the USD 19 tier only', async () => {
+test('Get Zovo Pro with GitHub Sponsors in the panel opens the USD 19 tier only', async () => {
   const s = start();
   try {
     s.state.set(TRIES_KEY, { cover: 3 });
-    s.ui.info.push('Get Zovo Pro, USD 19');
+    s.ui.info.push('Get Zovo Pro with GitHub Sponsors');
     await cmd(s, 'exportHtml', s.vscode.Uri.file(COVER));
     assert.deepEqual(s.log.external.filter((u) => /github\.com\/sponsors/.test(u)), ['https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878']);
   } finally { s.restore(); }

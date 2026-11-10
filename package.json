@@ -152,6 +152,11 @@
         "command": "markdownExport.payWithPayPal",
         "title": "Pay for Zovo Pro with PayPal (USD 19, team of 5 USD 59)",
         "category": "Zovo Pro"
+      },
+      {
+        "command": "markdownExport.payByCard",
+        "title": "Pay for Zovo Pro by card (USD 19)",
+        "category": "Zovo Pro"
       }
     ],
     "submenus": [
@@ -273,6 +278,10 @@
         },
         {
           "command": "markdownExport.payWithPayPal",
+          "when": "config.markdownExport.showProFeatures"
+        },
+        {
+          "command": "markdownExport.payByCard",
           "when": "config.markdownExport.showProFeatures"
         }
       ]

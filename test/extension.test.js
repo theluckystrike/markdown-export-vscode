@@ -21,7 +21,7 @@ test('package: every command the code registers is declared, and the other way r
   const declared = new Set(pkg.contributes.commands.map((c) => c.command));
   const code = src('extension.js');
   const registered = new Set([...code.matchAll(/reg\('([A-Za-z]+)'/g)].map((m) => `markdownExport.${m[1]}`));
-  for (const c of ['supportDeveloper', 'moreViewers', 'getPro', 'unlockWithSponsors', 'enterLicenseKey', 'removeLicense', 'payWithPayPal']) registered.add(`markdownExport.${c}`);
+  for (const c of ['supportDeveloper', 'moreViewers', 'getPro', 'unlockWithSponsors', 'enterLicenseKey', 'removeLicense', 'payWithPayPal', 'payByCard']) registered.add(`markdownExport.${c}`);
   for (const c of registered) assert.ok(declared.has(c), `declared: ${c}`);
   for (const c of declared) assert.ok(registered.has(c), `registered: ${c}`);
   const menuCmds = Object.values(pkg.contributes.menus).flat().map((m) => m.command).filter(Boolean);
@@ -49,10 +49,10 @@ test('no network code outside the Sponsors unlock', () => {
   }
 });
 
-test('license module is MODULE_VERSION 2026-11-10.exec14, files unchanged (sha256 from out/EXEC14-module-ready.txt)', () => {
+test('license module is MODULE_VERSION 2026-11-10.card1, files unchanged (sha256 from out/CARD1-module-ready.txt)', () => {
   const crypto = require('crypto');
   const want = {
-    'index.js': '075c4ef3c16b39723d129367cd9a034ac9112cefd9f7c60bbdad708f7ebadd3e',
+    'index.js': '1a16e8e052ea68116df1cf510a47dbe4014c97dc88bea19056276c53440954f1',
     'license.js': 'c7085eb8137baa256aa55547227230e7eabc4f32b2ce0e717565755dc905afdf',
     'sponsors.js': 'd74681177ce4be80005a1057815cf65db0b5325f83a14e4d22335e8e1622c1f4',
     'gumroad.js': 'c42ac8513374b123212b0379bb7653cce1ffc0ddf7523152a1764d15d2ba1d90',
@@ -60,7 +60,8 @@ test('license module is MODULE_VERSION 2026-11-10.exec14, files unchanged (sha25
   for (const [f, h] of Object.entries(want)) {
     assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'src', 'license', f))).digest('hex'), h, f);
   }
-  assert.equal(require('../src/license').MODULE_VERSION, '2026-11-10.exec14');
+  assert.equal(require('../src/license').MODULE_VERSION, '2026-11-10.card1');
+  assert.equal(require('../src/license/config').card_buy_url, 'https://license.zovo.one/buy/zovo-pro');
 });
 
 // ---- Pro tries with a fake VS Code ----------------------------------------------------------------------------------
@@ -110,17 +111,17 @@ test('pro: allowed() never uses a try; produced() counts one; 3 tries, then one 
   assert.equal(await pro.allowed('merge'), false);
   assert.equal(f.shown.length, 1);
   assert.equal(f.shown[0].msg, 'Merge a folder into one PDF is part of Zovo Pro.');
-  assert.deepEqual(f.shown[0].rest.slice(0, 3), ['Get Zovo Pro, USD 19', 'Pay with PayPal', 'I already paid']);
+  assert.deepEqual(f.shown[0].rest.slice(0, 4), ['Pay by card (USD 19)', 'Get Zovo Pro with GitHub Sponsors', 'Pay with PayPal', 'Enter a key']);
   assert.match(f.shown[0].opts.detail, /Word template and Cover page here/);
   // other features keep their own tries
   assert.equal(await pro.allowed('cover'), true);
   assert.equal(pro.triesLeft('cover'), 3);
-  for (const c of ['markdownExport.getPro', 'markdownExport.payWithPayPal', 'markdownExport.unlockWithSponsors', 'markdownExport.enterLicenseKey', 'markdownExport.removeLicense']) assert.ok(f.commands.has(c), c);
+  for (const c of ['markdownExport.getPro', 'markdownExport.payWithPayPal', 'markdownExport.payByCard', 'markdownExport.unlockWithSponsors', 'markdownExport.enterLicenseKey', 'markdownExport.removeLicense']) assert.ok(f.commands.has(c), c);
 });
 
 test('pro: Get Zovo Pro from the panel opens only the USD 19 Sponsors tier', async () => {
   const { createPro } = require('../src/pro');
-  const f = fakeVscode(['Get Zovo Pro, USD 19']);
+  const f = fakeVscode(['Get Zovo Pro with GitHub Sponsors']);
   const pro = createPro({ vscode: f.vscode, context: f.context });
   for (let i = 0; i < 3; i++) await pro.produced('template');
   assert.equal(await pro.allowed('template'), false);
@@ -144,4 +145,15 @@ test('package: display name starts with the measured phrase "Markdown to PDF"; n
   assert.ok(!pkg.displayName.includes('Markdown to PDF & Word'), 'not another listing\'s full name');
   for (const k of ['markdown to pdf', 'markdown to word', 'markdown to docx', 'markdown to html', 'md to pdf']) assert.ok(pkg.keywords.includes(k), k);
   assert.equal(pkg.version, '0.1.1');
+});
+
+test('pro: Pay by card from the panel opens the card checkout with a random install id, no other URL', async () => {
+  const { createPro } = require('../src/pro');
+  const f = fakeVscode(['Pay by card (USD 19)']);
+  const pro = createPro({ vscode: f.vscode, context: f.context });
+  for (let i = 0; i < 3; i++) await pro.produced('cover');
+  assert.equal(await pro.allowed('cover'), false);
+  const opened = f.shown.filter((x) => x.open).map((o) => o.open);
+  assert.equal(opened.length, 1);
+  assert.match(opened[0], /^https:\/\/license\.zovo\.one\/buy\/zovo-pro\?client_reference_id=[0-9a-f-]{20,}$/);
 });

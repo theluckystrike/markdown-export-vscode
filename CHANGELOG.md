@@ -4,8 +4,8 @@
 
 - New name: Markdown to PDF & Markdown to Word (DOCX, HTML Export, No Chromium Download). Same extension id and settings.
 - A Zovo Pro try is now used only after a file was saved with the tool, and one export run uses at most one try per tool, even for a whole folder. Cancel or a failed export keeps the try.
-- The Zovo Pro panel shows the price once (USD 19), the other Pro tools and four buttons: Get Zovo Pro, Pay with PayPal, I already paid, Cancel. It appears at most once per export run.
-- New command Zovo Pro: Pay for Zovo Pro with PayPal.
+- The Zovo Pro panel shows the price once (USD 19), the other Pro tools and the ways to pay: Pay by card (USD 19), Get Zovo Pro with GitHub Sponsors, Pay with PayPal, and Enter a key. It appears at most once per export run.
+- New commands Zovo Pro: Pay for Zovo Pro by card, and Pay for Zovo Pro with PayPal.
 - Folder export and Merge a Folder into One PDF list the workspace folders and the folders with Markdown files, so you can pick one without browsing.
 - The walkthrough opens a sample file with a table, code, a formula, a Mermaid diagram and an image.
 - Word templates are size-checked (50 MB file, 16 MB of styles). A template that cannot be read is skipped with a note and uses no try.

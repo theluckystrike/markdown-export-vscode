@@ -105,7 +105,7 @@ Zovo Pro adds three tools for longer documents. Each has 3 free tries on your co
 
 A try is used only when a file was saved with the tool. One export run uses one try per tool, even for a whole folder. If you cancel, or the export fails, the try stays. After the third try, the next use of that tool shows what Zovo Pro is, once, and the export still runs without the Pro part if you cancel. Nothing about Pro appears on its own. Set `markdownExport.showProFeatures` to `false` to hide the Pro command and the Zovo Pro commands.
 
-Zovo Pro is USD 19 once on GitHub Sponsors (the "$19 one time" tier: https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878), or by PayPal (Zovo Pro: Pay for Zovo Pro with PayPal). It turns on the Pro tools in every Zovo VS Code extension. If you bought that tier, or sponsor monthly with USD 10 or more, run Zovo Pro: I already paid: unlock with GitHub Sponsors.
+Zovo Pro is USD 19 once: by card (Zovo Pro: Pay for Zovo Pro by card), on GitHub Sponsors (the "$19 one time" tier: https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878), or by PayPal (Zovo Pro: Pay for Zovo Pro with PayPal). It turns on the Pro tools in every Zovo VS Code extension. A card or PayPal purchase gives you a license key: run Zovo Pro: Enter Zovo Pro license key. If you bought the Sponsors tier, or sponsor monthly with USD 10 or more, run Zovo Pro: I already paid: unlock with GitHub Sponsors.
 
 ## Settings
 

@@ -310,6 +310,12 @@ const LIVE = [
 ];
 const QUEUED = [
   [
+    "zovo.zovo-apk-analyzer",
+    "APK Analyzer & APK Viewer (AndroidManifest, DEX Method Count, APK Size)",
+    "opens APK files: manifest, permissions, DEX method counts and size by folder.",
+    "https://github.com/theluckystrike/apk-analyzer-vscode"
+  ],
+  [
     "zovo.zovo-azure-storage-explorer",
     "Azure Storage & Azure Blob Storage Explorer (Blob, Queue, Table, Azurite)",
     "browses Azure Blob, Queue and Table Storage with a connection string.",
@@ -328,6 +334,18 @@ const QUEUED = [
     "https://github.com/theluckystrike/elf-pe-viewer-vscode"
   ],
   [
+    "zovo.zovo-excel-compare",
+    "Excel Compare & XLSX Diff (Compare Excel Files, CSV Diff, Spreadsheet Compare)",
+    "compares two Excel or CSV files cell by cell and shows what changed.",
+    "https://github.com/theluckystrike/excel-compare-vscode"
+  ],
+  [
+    "zovo.zovo-excel-to-markdown",
+    "Excel to Markdown Table & CSV to Markdown (Paste from Excel, Google Sheets, XLSX)",
+    "turns Excel and CSV tables into Markdown tables, from a file or a paste.",
+    "https://github.com/theluckystrike/excel-to-markdown-vscode"
+  ],
+  [
     "zovo.zovo-folder-diff",
     "Folder Compare & Folder Diff (Directory Compare, Word, Excel & Binary Files)",
     "compares two folders side by side and opens a diff for any file.",
@@ -338,6 +356,18 @@ const QUEUED = [
     "Git Commit Graph & History Log (Branches, Compare, Blame)",
     "shows every branch and tag as a commit graph, with search.",
     "https://github.com/theluckystrike/git-commit-graph-vscode"
+  ],
+  [
+    "zovo.zovo-intel-hex-viewer",
+    "Intel HEX Viewer & S-Record Viewer (HEX, SREC, S19 Firmware Memory Map)",
+    "opens Intel HEX and S-record firmware images as a memory map with a hex view.",
+    "https://github.com/theluckystrike/intel-hex-viewer-vscode"
+  ],
+  [
+    "zovo.zovo-jar-viewer",
+    "JAR Viewer & Java Decompiler (Class File Viewer, Bytecode, CFR)",
+    "opens JAR and class files: browse classes, read bytecode and decompiled Java.",
+    "https://github.com/theluckystrike/jar-viewer-vscode"
   ],
   [
     "zovo.zovo-markdown-export",
